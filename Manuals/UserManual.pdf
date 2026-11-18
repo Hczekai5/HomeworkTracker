@@ -1,0 +1,84 @@
+User Manual
+
+1. Introduction
+The Homework Tracker is a JavaFX application designed to help students organize and manage their school assignments. Users can add assignments, edit existing assignments, delete assignments, mark assignments as complete, and view assignments based on different filters and sorting options.
+The program supports five assignment types: Homework, Projects, Exams, Essays, and Quizzes.
+
+2. Getting Started
+When the program opens, the main Homework Tracker window appears. The user can enter assignment information, select assignment options, and use the available buttons to manage assignments.
+
+3. Adding an Assignment
+To add a new assignment:
+Enter the assignment name.
+Enter a description of the assignment.
+Select the due date using the date picker.
+Select a priority: High, Medium, or Low.
+Select the assignment type: Homework, Project, Exam, Essay, or Quiz.
+Click Add Assignment.
+The assignment will appear in the assignment display area. The input fields will clear after the assignment is added.
+An assignment name and due date are required. If either is missing, the program displays an error message.
+
+4. Editing an Assignment
+To edit an existing assignment:
+Enter the name of the assignment you want to change in the Select an Assignment field.
+Enter the updated assignment information in the input fields.
+Select the updated due date, priority, and assignment type.
+Click Edit Assignment.
+The program replaces the original assignment with the updated information rather than creating a duplicate.
+
+5. Deleting an Assignment
+To delete an assignment:
+Enter the assignment name in the Select an Assignment field.
+Click Delete Assignment.
+The assignment will be removed from the list. If the assignment cannot be found, the program displays an error message.
+
+6. Marking an Assignment Complete
+To mark an assignment as completed:
+Enter the assignment name in the Select an Assignment field.
+Click Mark Complete.
+The assignment's status will change to Completed.
+
+7. Filtering Assignments
+The program allows users to filter assignments in three ways.
+1) Filter by Priority
+All
+High
+Medium
+Low
+
+2) Filter by Type
+All
+Homework
+Project
+Exam
+Essay
+Quiz
+
+3) Filter by Status
+All
+Completed
+Incomplete
+Overdue
+
+After selecting the desired filters, click Apply Filter and Sort to update the assignment display.
+
+8. Sorting Assignments
+Users can organize assignments using three sorting options:
+Name: Arranges assignments alphabetically.
+Due Date: Arranges assignments by their due dates.
+Priority: Arranges assignments from High to Low priority.
+
+Click Apply Filter and Sort to apply the selected sorting option.
+
+9. Viewing All Assignments
+Click View All Assignments to display every assignment, regardless of the filters previously selected.
+
+10. Assignment Status
+Each assignment displays one of three statuses:
+Completed: The assignment has been marked complete.
+Incomplete: The assignment has not been completed and is not overdue.
+Overdue: The assignment's due date has passed and it has not been completed.
+
+11. Exiting the Program
+Click the Exit button to close the Homework Tracker application.
+
