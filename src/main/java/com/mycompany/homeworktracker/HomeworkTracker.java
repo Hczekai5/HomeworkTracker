@@ -13,37 +13,26 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-/**
- *
- * @author hczek
- */
-
 public class HomeworkTracker extends Application {
+    
+// Stores all assignments.
+private List<Assignment> assignments = new ArrayList<>();
 
-    // Stores course information and assignments.
-    private Course course = new Course("", "", "");
-
-    // Course information fields.
-    private TextField courseNameField = new TextField();
-    private TextField courseCodeField = new TextField();
-    private TextField professorField = new TextField();
-
-    // Assignment information fields.
+    //Assignment input fields.
     private TextField assignmentNameField = new TextField();
     private TextField descriptionField = new TextField();
-    private TextField searchNameField = new TextField();
-
+    private TextField selectNameField = new TextField();
     private DatePicker dueDatePicker = new DatePicker();
 
-    // Priority options.
+    // Assignment priority options.
     private RadioButton highPriority = new RadioButton("High");
     private RadioButton mediumPriority = new RadioButton("Medium");
     private RadioButton lowPriority = new RadioButton("Low");
-
     private ToggleGroup priorityGroup = new ToggleGroup();
 
     // Assignment type options.
@@ -52,652 +41,479 @@ public class HomeworkTracker extends Application {
     private RadioButton examType = new RadioButton("Exam");
     private RadioButton essayType = new RadioButton("Essay");
     private RadioButton quizType = new RadioButton("Quiz");
-
     private ToggleGroup typeGroup = new ToggleGroup();
 
-    // Filter by priority.
+    // Priority filter options.
     private RadioButton allPriorities = new RadioButton("All");
     private RadioButton filterHigh = new RadioButton("High");
     private RadioButton filterMedium = new RadioButton("Medium");
     private RadioButton filterLow = new RadioButton("Low");
-
     private ToggleGroup filterPriorityGroup = new ToggleGroup();
 
-    // Filter by assignment type.
+    // Assignment type filter options.
     private RadioButton allTypes = new RadioButton("All");
     private RadioButton filterHomework = new RadioButton("Homework");
     private RadioButton filterProject = new RadioButton("Project");
     private RadioButton filterExam = new RadioButton("Exam");
     private RadioButton filterEssay = new RadioButton("Essay");
     private RadioButton filterQuiz = new RadioButton("Quiz");
-
     private ToggleGroup filterTypeGroup = new ToggleGroup();
 
-    // Filter by completion status.
+    // Assignment completion status filters.
     private RadioButton allStatus = new RadioButton("All");
     private RadioButton completedStatus = new RadioButton("Completed");
     private RadioButton incompleteStatus = new RadioButton("Incomplete");
-
+    private RadioButton overdueStatus = new RadioButton("Overdue");
     private ToggleGroup statusGroup = new ToggleGroup();
 
-    // Sorting options.
+    // Assignment sorting options.
     private RadioButton sortName = new RadioButton("Name");
     private RadioButton sortDate = new RadioButton("Due Date");
     private RadioButton sortPriority = new RadioButton("Priority");
-
     private ToggleGroup sortGroup = new ToggleGroup();
 
-    // Displays messages and assignments.
-    private Label messageLabel = new Label("Welcome to the Homework Tracker!");
-
-    private VBox assignmentDisplay = new VBox(5);
+    // Displays messages and assignment information.
+    private Label messageLabel = new Label("Welcome to Homework Tracker!");
+   // Displays assignment cards horizontally and wraps to new rows.
+   private FlowPane assignmentDisplay = new FlowPane();
 
     @Override
     public void start(Stage stage) {
 
-        // Create the main layout.
+        // Creates the main layout.
         GridPane grid = new GridPane();
-
         grid.setPadding(new Insets(15));
         grid.setHgap(10);
         grid.setVgap(10);
 
         int row = 0;
 
-        // Course information section.
-        grid.add(new Label("Course Information"), 0, row++);
-
-        grid.add(new Label("Course Name:"), 0, row);
-        grid.add(courseNameField, 1, row++);
-
-        grid.add(new Label("Course Code:"), 0, row);
-        grid.add(courseCodeField, 1, row++);
-
-        grid.add(new Label("Professor:"), 0, row);
-        grid.add(professorField, 1, row++);
-
-        // Assignment information section.
-        grid.add(new Label("Assignment Information"), 0, row++);
-
+        // Assignment information.
+        grid.add(new Label("Assignment Information:"), 0, row++);
         grid.add(new Label("Assignment Name:"), 0, row);
         grid.add(assignmentNameField, 1, row++);
-
         grid.add(new Label("Description:"), 0, row);
         grid.add(descriptionField, 1, row++);
-
         grid.add(new Label("Due Date:"), 0, row);
         grid.add(dueDatePicker, 1, row++);
 
-        // Priority selection.
+        // Select assignment priority.
         highPriority.setToggleGroup(priorityGroup);
         mediumPriority.setToggleGroup(priorityGroup);
         lowPriority.setToggleGroup(priorityGroup);
-
         mediumPriority.setSelected(true);
 
         HBox priorityOptions = new HBox(
-                10, highPriority, mediumPriority, lowPriority
-        );
-
+                10, highPriority, mediumPriority, lowPriority);
         grid.add(new Label("Priority:"), 0, row);
         grid.add(priorityOptions, 1, row++);
 
-        // Assignment type selection.
+        // Select assignment type.
         homeworkType.setToggleGroup(typeGroup);
         projectType.setToggleGroup(typeGroup);
         examType.setToggleGroup(typeGroup);
         essayType.setToggleGroup(typeGroup);
         quizType.setToggleGroup(typeGroup);
-
         homeworkType.setSelected(true);
 
         HBox typeOptions = new HBox(
                 10, homeworkType, projectType,
-                examType, essayType, quizType
-        );
-
+                examType, essayType, quizType);
         grid.add(new Label("Assignment Type:"), 0, row);
         grid.add(typeOptions, 1, row++);
 
-        // Assignment buttons.
+        // Creates assignment action buttons.
         Button addButton = new Button("Add Assignment");
         Button editButton = new Button("Edit Assignment");
         Button deleteButton = new Button("Delete Assignment");
         Button completeButton = new Button("Mark Complete");
-        Button clearButton = new Button("Clear Form");
-
+        Button clearButton = new Button("Clear Assignments");
+        Button exitButton = new Button("Exit");
         HBox assignmentButtons = new HBox(
-                10, addButton, editButton,
-                deleteButton, completeButton, clearButton
-        );
-
+                10, addButton, editButton, deleteButton,
+                completeButton);
         grid.add(assignmentButtons, 0, row++, 2, 1);
 
-        // Field for finding an existing assignment.
-        grid.add(new Label("Existing Assignment Name:"), 0, row);
-        grid.add(searchNameField, 1, row++);
+        // Search for an assignment by name.
+        grid.add(new Label("Select an Assignment:"), 0, row);
+        grid.add(selectNameField, 1, row++);
 
-        // Filter by priority.
+        // Priority filters.
+        grid.add(new Label("Filter by Priority:"), 0, row++);
         allPriorities.setToggleGroup(filterPriorityGroup);
         filterHigh.setToggleGroup(filterPriorityGroup);
         filterMedium.setToggleGroup(filterPriorityGroup);
         filterLow.setToggleGroup(filterPriorityGroup);
-
         allPriorities.setSelected(true);
 
         HBox priorityFilters = new HBox(
                 10, allPriorities, filterHigh,
-                filterMedium, filterLow
-        );
+                filterMedium, filterLow);
+        grid.add(priorityFilters, 0, row++, 2, 1);
 
-        grid.add(new Label("Filter by Priority:"), 0, row);
-        grid.add(priorityFilters, 1, row++);
-
-        // Filter by assignment type.
+        // Assignment type filters.
+        grid.add(new Label("Filter by Type:"), 0, row++);
         allTypes.setToggleGroup(filterTypeGroup);
         filterHomework.setToggleGroup(filterTypeGroup);
         filterProject.setToggleGroup(filterTypeGroup);
         filterExam.setToggleGroup(filterTypeGroup);
         filterEssay.setToggleGroup(filterTypeGroup);
         filterQuiz.setToggleGroup(filterTypeGroup);
-
         allTypes.setSelected(true);
 
         HBox typeFilters = new HBox(
                 10, allTypes, filterHomework, filterProject,
-                filterExam, filterEssay, filterQuiz
-        );
+                filterExam, filterEssay, filterQuiz);
+        grid.add(typeFilters, 0, row++, 2, 1);
 
-        grid.add(new Label("Filter by Assignment Type:"), 0, row);
-        grid.add(typeFilters, 1, row++);
-
-        // Filter by completion status.
+        // Completion status filters.
+        grid.add(new Label("Filter by Status:"), 0, row++);
         allStatus.setToggleGroup(statusGroup);
         completedStatus.setToggleGroup(statusGroup);
         incompleteStatus.setToggleGroup(statusGroup);
-
+        overdueStatus.setToggleGroup(statusGroup);
         allStatus.setSelected(true);
 
         HBox statusFilters = new HBox(
-                10, allStatus, completedStatus, incompleteStatus
-        );
-
-        grid.add(new Label("Filter by Status:"), 0, row);
-        grid.add(statusFilters, 1, row++);
+                10, allStatus, completedStatus,
+                incompleteStatus, overdueStatus);
+        grid.add(statusFilters, 0, row++, 2, 1);
 
         // Sorting options.
+        grid.add(new Label("Sort By:"), 0, row++);
         sortName.setToggleGroup(sortGroup);
         sortDate.setToggleGroup(sortGroup);
         sortPriority.setToggleGroup(sortGroup);
-
         sortName.setSelected(true);
 
         HBox sortOptions = new HBox(
-                10, sortName, sortDate, sortPriority
-        );
+                10, sortName, sortDate, sortPriority);
+        grid.add(sortOptions, 0, row++, 2, 1);
 
-        grid.add(new Label("Sort By:"), 0, row);
-        grid.add(sortOptions, 1, row++);
-
-        // Filter and sort buttons.
+        // Filter, sort, and display buttons.
         Button applyButton = new Button("Apply Filter and Sort");
         Button viewButton = new Button("View All Assignments");
+       // Places all four buttons next to each other.
+       HBox filterButtons = new HBox(10, applyButton, viewButton, clearButton, exitButton);
+       grid.add(filterButtons, 0, row++, 2, 1);
+        
+        // Sets spacing between assignment cards.
+        assignmentDisplay.setHgap(15);
+        assignmentDisplay.setVgap(15);
+        assignmentDisplay.setPrefWrapLength(850);
+        assignmentDisplay.setMaxWidth(900);
 
-        HBox filterButtons = new HBox(10, applyButton, viewButton);
-
-        grid.add(filterButtons, 0, row++, 2, 1);
-
-        // Message label.
+        // Displays messages and assignment information.
         grid.add(messageLabel, 0, row++, 2, 1);
+        grid.add(new Label("Assignments:"), 0, row++, 2, 1);
+        grid.add(assignmentDisplay, 0, row++, 2, 1);
+       
 
-        // Connect buttons to their methods.
+        // Connects buttons to their methods.
         addButton.setOnAction(e -> addAssignment());
         editButton.setOnAction(e -> editAssignment());
         deleteButton.setOnAction(e -> deleteAssignment());
         completeButton.setOnAction(e -> markAssignmentComplete());
         clearButton.setOnAction(e -> clearForm());
-
-        applyButton.setOnAction(e -> applyFilterAndSort());
+        applyButton.setOnAction(e -> { messageLabel.setText(""); 
+        applyFilterAndSort(); });
         viewButton.setOnAction(e -> displayAllAssignments());
+        exitButton.setOnAction(e -> stage.close());
 
-        // Create the window layout.
-        VBox layout = new VBox(
-                10,
-                grid,
-                new Label("Assignments:"),
-                assignmentDisplay
-        );
-
+        // Displays the application window.
+        VBox layout = new VBox(10, grid);
         layout.setPadding(new Insets(10));
 
         Scene scene = new Scene(layout, 1050, 950);
-
         stage.setTitle("Homework Tracker");
         stage.setScene(scene);
         stage.show();
     }
 
-    // Checks that the required information is entered.
-    private boolean validInput() {
-
-        if (courseNameField.getText().trim().isEmpty()
-                || courseCodeField.getText().trim().isEmpty()
-                || professorField.getText().trim().isEmpty()
-                || assignmentNameField.getText().trim().isEmpty()
-                || dueDatePicker.getValue() == null) {
-
-            messageLabel.setText("Please complete all required fields.");
-            return false;
-        }
-
-        return true;
-    }
-
-    // Updates course information.
-    private void updateCourseInformation() {
-
-        course.setCourseName(courseNameField.getText().trim());
-        course.setCourseCode(courseCodeField.getText().trim());
-        course.setProfessor(professorField.getText().trim());
-    }
-
-    // Gets the selected priority.
-    private String getSelectedPriority() {
-
-        if (highPriority.isSelected()) {
-            return "High";
-        } else if (mediumPriority.isSelected()) {
-            return "Medium";
-        } else {
-            return "Low";
-        }
-    }
-
-    // Creates the correct assignment subclass.
+    // Creates an assignment using the selected options.
     private Assignment createAssignment() {
 
-        String name = assignmentNameField.getText().trim();
-        String description = descriptionField.getText().trim();
+        String name = assignmentNameField.getText();
+        String description = descriptionField.getText();
         LocalDate dueDate = dueDatePicker.getValue();
-        String priority = getSelectedPriority();
 
-        if (homeworkType.isSelected()) {
-            return new Homework(name, description, dueDate, priority);
+        if (name.isEmpty() || dueDate == null) {
+            messageLabel.setText("Enter an assignment name and due date.");
+            return null;
+        }
 
-        } else if (projectType.isSelected()) {
+        String priority = "Medium";
+        if (highPriority.isSelected()) {
+            priority = "High";
+        } else if (lowPriority.isSelected()) {
+            priority = "Low";
+        }
+
+        // Creates the correct assignment subclass.
+        if (projectType.isSelected()) {
             return new Project(name, description, dueDate, priority);
-
         } else if (examType.isSelected()) {
             return new Exam(name, description, dueDate, priority);
-
         } else if (essayType.isSelected()) {
             return new Essay(name, description, dueDate, priority);
-
-        } else {
+        } else if (quizType.isSelected()) {
             return new Quiz(name, description, dueDate, priority);
         }
+
+        return new Homework(name, description, dueDate, priority);
     }
 
-    // Adds a new assignment.
-    private void addAssignment() {
+    // Adds a new assignment to the list.
+// Adds a new assignment to the list.
+private void addAssignment() {
+    Assignment assignment = createAssignment();
+    if (assignment == null) {
+        return;
+    }
+    assignments.add(assignment);
 
-        if (!validInput()) {
-            return;
+    messageLabel.setText("Assignment added successfully!");
+    // Refreshes the display using the selected filters.
+    applyFilterAndSort();
+    clearAssignmentFields();
+}
+
+    // Finds an assignment using its name.
+private Assignment findAssignment(String name) {
+
+    for (Assignment assignment : assignments) {
+        if (assignment.getAssignmentName().equalsIgnoreCase(name)) {
+            return assignment;
         }
-
-        updateCourseInformation();
-
-        Assignment assignment = createAssignment();
-
-        course.addAssignment(assignment);
-
-        messageLabel.setText("Assignment added successfully.");
-
-        clearAssignmentFields();
-        displayAllAssignments();
     }
 
-    // Finds an assignment by name.
-    private Assignment findAssignment(String name) {
+    return null;
+}
 
-        for (Assignment assignment : course.getAssignments()) {
+    // Updates an existing assignment.
+private void editAssignment() {
 
-            if (assignment.getAssignmentName()
-                    .equalsIgnoreCase(name.trim())) {
+    String name = selectNameField.getText();
+    Assignment oldAssignment = findAssignment(name);
 
-                return assignment;
-            }
-        }
-
-        return null;
+    if (oldAssignment == null) {
+        messageLabel.setText("Assignment not found.");
+        return;
     }
 
-    // Edits an existing assignment.
-    private void editAssignment() {
+    Assignment updatedAssignment = createAssignment();
 
-        String oldName = searchNameField.getText().trim();
-
-        if (oldName.isEmpty()) {
-            messageLabel.setText("Enter the existing assignment name.");
-            return;
-        }
-
-        Assignment oldAssignment = findAssignment(oldName);
-
-        if (oldAssignment == null) {
-            messageLabel.setText("Assignment not found.");
-            return;
-        }
-
-        if (!validInput()) {
-            return;
-        }
-
-        updateCourseInformation();
-
-        // Remember whether the original assignment was completed.
-        boolean wasCompleted = oldAssignment.isCompleted();
-
-        // Create a replacement assignment.
-        Assignment newAssignment = createAssignment();
-
-        if (wasCompleted) {
-            newAssignment.markComplete();
-        }
-
-        // Replace the old assignment with the new one.
-        course.removeAssignment(oldAssignment);
-        course.addAssignment(newAssignment);
-
-        messageLabel.setText("Assignment updated successfully.");
-
-        clearAssignmentFields();
-        searchNameField.clear();
-
-        displayAllAssignments();
+    if (updatedAssignment == null) {
+        return;
     }
 
-    // Deletes an assignment.
-    private void deleteAssignment() {
+    // Replaces the old assignment.
+    int index = assignments.indexOf(oldAssignment);
+    assignments.set(index, updatedAssignment);
 
-        String name = searchNameField.getText().trim();
+    messageLabel.setText("Assignment updated successfully!");
+    applyFilterAndSort();
+    clearAssignmentFields();
+    selectNameField.clear();
+}
 
-        if (name.isEmpty()) {
-            messageLabel.setText("Enter an assignment name to delete.");
-            return;
-        }
-
-        Assignment assignment = findAssignment(name);
-
-        if (assignment == null) {
-            messageLabel.setText("Assignment not found.");
-            return;
-        }
-
-        course.removeAssignment(assignment);
-
-        messageLabel.setText("Assignment deleted successfully.");
-
-        searchNameField.clear();
-
-        displayAllAssignments();
+    // Deletes the selected assignment.
+private void deleteAssignment() {
+    Assignment assignment = findAssignment(selectNameField.getText());
+    if (assignment == null) {
+        messageLabel.setText("Assignment not found.");
+        return;
     }
+    assignments.remove(assignment);
+    messageLabel.setText("Assignment deleted successfully!");
+    applyFilterAndSort();
+    selectNameField.clear();
+}
 
-    // Marks an assignment as complete.
+    // Marks an assignment as completed.
     private void markAssignmentComplete() {
-
-        String name = searchNameField.getText().trim();
-
-        if (name.isEmpty()) {
-            messageLabel.setText("Enter an assignment name.");
-            return;
-        }
-
-        Assignment assignment = findAssignment(name);
-
+        Assignment assignment = findAssignment(selectNameField.getText());
         if (assignment == null) {
             messageLabel.setText("Assignment not found.");
             return;
         }
-
         assignment.markComplete();
-
-        messageLabel.setText("Assignment marked as complete.");
-
-        displayAllAssignments();
+        messageLabel.setText("Assignment marked as completed!");
+        applyFilterAndSort();
+        selectNameField.clear();
     }
 
-    // Clears assignment input fields.
-    private void clearAssignmentFields() {
+    // Checks whether an assignment is overdue.
+    private boolean isOverdue(Assignment assignment) {
+        return assignment.isOverdue();
+    }
 
+    // Applies filters and sorting to assignments.
+private void applyFilterAndSort() {
+    List<Assignment> filteredAssignments =
+            new ArrayList<>(assignments);
+
+    // Filters assignments by priority, type, and status.
+    filteredAssignments.removeIf(assignment -> {
+
+        if (filterHigh.isSelected()
+                && !assignment.getPriority().equals("High")) {
+            return true;
+        }
+
+        if (filterMedium.isSelected()
+                && !assignment.getPriority().equals("Medium")) {
+            return true;
+        }
+
+        if (filterLow.isSelected()
+                && !assignment.getPriority().equals("Low")) {
+            return true;
+        }
+
+        String type = assignment.getAssignmentType();
+
+        if (filterHomework.isSelected() && !type.equals("Homework")) {
+            return true;
+        }
+
+        if (filterProject.isSelected() && !type.equals("Project")) {
+            return true;
+        }
+
+        if (filterExam.isSelected() && !type.equals("Exam")) {
+            return true;
+        }
+
+        if (filterEssay.isSelected() && !type.equals("Essay")) {
+            return true;
+        }
+
+        if (filterQuiz.isSelected() && !type.equals("Quiz")) {
+            return true;
+        }
+
+        if (completedStatus.isSelected()
+                && !assignment.isCompleted()) {
+            return true;
+        }
+
+        if (incompleteStatus.isSelected()
+                && (assignment.isCompleted() || isOverdue(assignment))) {
+            return true;
+        }
+
+        return overdueStatus.isSelected() && !isOverdue(assignment);
+    });
+
+    // Sorts assignments by the selected option.
+    if (sortName.isSelected()) {
+        filteredAssignments.sort((a, b) ->
+                a.getAssignmentName().compareToIgnoreCase(
+                        b.getAssignmentName()));
+    } else if (sortDate.isSelected()) {
+        filteredAssignments.sort((a, b) ->
+                a.getDueDate().compareTo(b.getDueDate()));
+    } else if (sortPriority.isSelected()) {
+        filteredAssignments.sort((a, b) ->
+                priorityRank(a.getPriority())
+                        - priorityRank(b.getPriority()));
+    }
+
+    displayAssignments(filteredAssignments);
+}
+
+
+    // Gives each priority a sorting number.
+    private int priorityRank(String priority) {
+        if (priority.equals("High")) {
+            return 1;
+        } else if (priority.equals("Medium")) {
+            return 2;
+        }
+        return 3;
+    }
+
+    // Displays all assignments.
+private void displayAllAssignments() {
+    displayAssignments(assignments);
+}
+
+   // Displays assignments and their information using FlowPane.
+private void displayAssignments(List<Assignment> filteredAssignments) {
+
+    assignmentDisplay.getChildren().clear();
+
+    // Displays a message when no assignments match.
+    if (filteredAssignments.isEmpty()) {
+        assignmentDisplay.getChildren().add(
+                new Label("No assignments match this filter.")
+        );
+        return;
+    }
+
+    // Creates a card for each assignment.
+    for (Assignment assignment : filteredAssignments) {
+
+        String status;
+
+        if (assignment.isCompleted()) {
+            status = "Completed";
+        } else if (isOverdue(assignment)) {
+            status = "Overdue";
+        } else {
+            status = "Incomplete";
+        }
+
+        Label assignmentLabel = new Label(
+                "Name: " + assignment.getAssignmentName()
+                + "\nDescription: " + assignment.getDescription()
+                + "\nDue Date: " + assignment.getDueDate()
+                + "\nPriority: " + assignment.getPriority()
+                + "\nType: " + assignment.getAssignmentType()
+                + "\nStatus: " + status
+        );
+
+        // Formats each assignment card.
+        assignmentLabel.setPrefWidth(200);
+        assignmentLabel.setMinHeight(130);
+        assignmentLabel.setPadding(new Insets(10));
+        assignmentLabel.setWrapText(true);
+        assignmentLabel.setStyle(
+                "-fx-border-color: gray;"
+                + "-fx-border-radius: 5;"
+                + "-fx-background-radius: 5;"
+        );
+
+        assignmentDisplay.getChildren().add(assignmentLabel);
+    }
+}
+
+    // Clears only the assignment input fields.
+    private void clearAssignmentFields() {
         assignmentNameField.clear();
         descriptionField.clear();
         dueDatePicker.setValue(null);
-
         mediumPriority.setSelected(true);
         homeworkType.setSelected(true);
     }
 
-    // Clears all fields and deletes every assignment.
-    private void clearForm() {
-
-        // Clear course information.
-        courseNameField.clear();
-        courseCodeField.clear();
-        professorField.clear();
-
-        // Clear assignment information.
-        clearAssignmentFields();
-        searchNameField.clear();
-
-        // Reset filters and sorting options.
-        allPriorities.setSelected(true);
-        allTypes.setSelected(true);
-        allStatus.setSelected(true);
-        sortName.setSelected(true);
-
-        // Delete all assignments from the course.
-        course.getAssignments().clear();
-
-        // Remove all displayed assignments.
-        assignmentDisplay.getChildren().clear();
-
-        messageLabel.setText("All fields and assignments have been cleared.");
-    }
-
-    // Filters assignments using the selected options.
-    private List<Assignment> filterAssignments() {
-
-        List<Assignment> filtered = new ArrayList<>();
-
-        for (Assignment assignment : course.getAssignments()) {
-
-            boolean matchesPriority = true;
-            boolean matchesType = true;
-            boolean matchesStatus = true;
-
-            // Filter by priority.
-            if (filterHigh.isSelected()) {
-                matchesPriority = assignment.getPriority().equals("High");
-
-            } else if (filterMedium.isSelected()) {
-                matchesPriority = assignment.getPriority().equals("Medium");
-
-            } else if (filterLow.isSelected()) {
-                matchesPriority = assignment.getPriority().equals("Low");
-            }
-
-            // Filter by assignment type.
-            if (filterHomework.isSelected()) {
-                matchesType = assignment.getAssignmentType().equals("Homework");
-
-            } else if (filterProject.isSelected()) {
-                matchesType = assignment.getAssignmentType().equals("Project");
-
-            } else if (filterExam.isSelected()) {
-                matchesType = assignment.getAssignmentType().equals("Exam");
-
-            } else if (filterEssay.isSelected()) {
-                matchesType = assignment.getAssignmentType().equals("Essay");
-
-            } else if (filterQuiz.isSelected()) {
-                matchesType = assignment.getAssignmentType().equals("Quiz");
-            }
-
-            // Filter by completion status.
-            if (completedStatus.isSelected()) {
-                matchesStatus = assignment.isCompleted();
-
-            } else if (incompleteStatus.isSelected()) {
-                matchesStatus = !assignment.isCompleted();
-            }
-
-            // Add assignments that match every selected filter.
-            if (matchesPriority && matchesType && matchesStatus) {
-
-                filtered.add(assignment);
-            }
-        }
-
-        return filtered;
-    }
-
-    // Sorts assignments using basic loops.
-    private void sortAssignments(List<Assignment> assignments) {
-
-        for (int i = 0; i < assignments.size() - 1; i++) {
-
-            for (int j = 0; j < assignments.size() - i - 1; j++) {
-
-                Assignment first = assignments.get(j);
-                Assignment second = assignments.get(j + 1);
-
-                boolean switchPlaces = false;
-
-                // Sort alphabetically by assignment name.
-                if (sortName.isSelected()) {
-
-                    switchPlaces = first.getAssignmentName()
-                            .compareToIgnoreCase(
-                                    second.getAssignmentName()) > 0;
-
-                // Sort by due date.
-                } else if (sortDate.isSelected()) {
-
-                    LocalDate firstDate = first.getDueDate();
-                    LocalDate secondDate = second.getDueDate();
-
-                    if (firstDate != null && secondDate != null) {
-                        switchPlaces = firstDate.isAfter(secondDate);
-
-                    } else if (firstDate == null && secondDate != null) {
-                        switchPlaces = true;
-                    }
-
-                // Sort by priority.
-                } else if (sortPriority.isSelected()) {
-
-                    int firstPriority = getPriorityNumber(
-                            first.getPriority());
-
-                    int secondPriority = getPriorityNumber(
-                            second.getPriority());
-
-                    switchPlaces = firstPriority > secondPriority;
-                }
-
-                // Switch the assignments if necessary.
-                if (switchPlaces) {
-
-                    assignments.set(j, second);
-                    assignments.set(j + 1, first);
-                }
-            }
-        }
-    }
-
-    // Gives each priority a number for sorting.
-    private int getPriorityNumber(String priority) {
-
-        switch (priority) {
-            case "High":
-                return 1;
-            case "Medium":
-                return 2;
-            default:
-                return 3;
-        }
-    }
-
-    // Applies filters and sorting.
-    private void applyFilterAndSort() {
-
-        List<Assignment> results = filterAssignments();
-
-        sortAssignments(results);
-
-        displayAssignments(results);
-
-        messageLabel.setText(
-                "Matching assignments: " + results.size()
-        );
-    }
-
-    // Displays all assignments.
-    private void displayAllAssignments() {
-
-        List<Assignment> assignments =
-                new ArrayList<>(course.getAssignments());
-
-        sortAssignments(assignments);
-
-        displayAssignments(assignments);
-    }
-
-    // Displays the assignments in the VBox.
-    private void displayAssignments(List<Assignment> assignments) {
-
-        assignmentDisplay.getChildren().clear();
-
-        // Display course information.
-        Label courseLabel = new Label(
-                "Course: " + course.getCourseName()
-                + " | Code: " + course.getCourseCode()
-                + " | Professor: " + course.getProfessor()
-        );
-
-        assignmentDisplay.getChildren().add(courseLabel);
-
-        // Display each assignment.
-        for (Assignment assignment : assignments) {
-
-            String status;
-
-            if (assignment.isCompleted()) {
-                status = "Completed";
-            } else {
-                status = "Incomplete";
-            }
-
-            Label assignmentLabel = new Label(
-                    "Name: " + assignment.getAssignmentName()
-                    + " | Description: " + assignment.getDescription()
-                    + " | Due: " + assignment.getDueDate()
-                    + " | Priority: " + assignment.getPriority()
-                    + " | Assignment Type: " + assignment.getAssignmentType()
-                    + " | Class Name: " + assignment.getClass().getSimpleName()
-                    + " | Status: " + status
-            );
-
-            assignmentDisplay.getChildren().add(assignmentLabel);
-        }
-
-        if (assignments.isEmpty()) {
-            assignmentDisplay.getChildren().add(
-                    new Label("No assignments found.")
-            );
-        }
-    }
+   // Clears all information and removes all assignments.
+private void clearForm() {
+    assignmentNameField.clear();
+    descriptionField.clear();
+    selectNameField.clear();
+    dueDatePicker.setValue(null);
+    mediumPriority.setSelected(true);
+    homeworkType.setSelected(true);
+    allPriorities.setSelected(true);
+    allTypes.setSelected(true);
+    allStatus.setSelected(true);
+    sortName.setSelected(true);
+    assignments.clear();
+    assignmentDisplay.getChildren().clear();
+    messageLabel.setText("Assignments cleared!");
+}
 
     public static void main(String[] args) {
         launch(args);
